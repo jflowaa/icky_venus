@@ -1,0 +1,13 @@
+version: '2'
+services:
+  webhost:
+    image: registry.devtoolbelt.xyz/icky_venus:latest
+    restart: always
+    ports:
+      - 4001:4000
+    volumes:
+      - ./data:/app/bin/data
+    environment:
+      PHX_HOST: "icky_venus.xyz"
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      RELEASE_COOKIE: ${RELEASE_COOKIE}

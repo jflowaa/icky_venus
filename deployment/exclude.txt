@@ -1,0 +1,8 @@
+*/.git
+*/.elixir_ls
+*/.dockerignore
+*/.gitignore
+*/_build
+*/deps
+*/icky_venus.tar.gz
+*/dbs

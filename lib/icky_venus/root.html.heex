@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= Application.get_env(:icky_venus, :product_name) %></title>
+  <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: "#800080",
+            primary: colors.purple,
+            secondary: colors.emerald,
+            neutral: colors.gray
+          }
+        },
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-white antialiased">
+  <header>
+    <div class="flex items-center justify-between border-b border-secondary-100 py-3">
+      <div class="flex items-center gap-4">
+        <a href="/" class="rounded-full bg-primary/5 px-2 font-medium leading-6 text-brand">
+          <%= Application.get_env(:icky_venus, :product_name) %>
+        </a>
+      </div>
+      <div class="flex items-center gap-4 text-[0.7525rem] font-semibold leading-6 text-secondary-800 active:text-secondary-800/70">
+        <a
+          href="https://github.com/jflowaa/icky_venus"
+          class="rounded-lg bg-primary-100 px-2 py-1 text-[0.8125rem] hover:bg-secondary-200/80"
+        >
+          Source Code <span aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+    </div>
+  </header>
+  <main class="px-4 py-5 sm:px-6 lg:px-8">
+    <div class="mx-auto w-fit">
+      <%= @content %>
+    </div>
+  </main>
+</body>
+</html>

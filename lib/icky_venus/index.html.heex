@@ -1,0 +1,16 @@
+<div class="px-4 sm:py-28 sm:px-6 lg:px-8 xl:py-32 xl:px-28">
+  <div class="mx-auto max-w-xl lg:mx-0">
+    <p class="mt-4 text-xl font-semibold leading-10 tracking-tighter text-primary-900">
+      Bluesky Metrics
+    </p>
+    <div class="flex">
+      <div class="w-full sm:w-auto">
+        <div hx-ext="ws" ws-connect="/events/post-created">
+          <p>
+            Posts since page load: <span id="count">0</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
