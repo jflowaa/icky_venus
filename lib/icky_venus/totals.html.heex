@@ -1,0 +1,6 @@
+<div>
+  <p>By date:</p>
+  <%= for {k, v} <- @totals do %>
+    <p><%= k %>: <%= Number.Delimit.number_to_delimited(v) %></p>
+  <% end %>
+</div>

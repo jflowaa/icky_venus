@@ -10,7 +10,9 @@ defmodule IckyVenus.WebsocketServer.PostCreatedServer do
 
   def handle_info(:broadcast, state) do
     count = state + 1
-    {:reply, :ok, {:text, "<span id=\"count\">#{count}</span>"}, count}
+
+    {:reply, :ok,
+     {:text, "<span id=\"count\">#{Number.Delimit.number_to_delimited(count)}</span>"}, count}
   end
 
   def handle_info(:register_event, state) do

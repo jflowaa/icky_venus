@@ -1,4 +1,5 @@
 defmodule IckyVenus.Router do
+  import EEx
   use Plug.Router
   use Plug.ErrorHandler
 
@@ -11,10 +12,31 @@ defmodule IckyVenus.Router do
   get "/" do
     conn
     |> put_resp_content_type("text/html; charset=utf-8")
-    |> send_resp(200, IckyVenus.HtmlRenderer.render_html("lib/icky_venus/index.html.heex"))
+    |> send_resp(
+      200,
+      IckyVenus.HtmlRenderer.render_html("lib/icky_venus/index.html.heex", %{
+        total_content:
+          eval_file(
+            "lib/icky_venus/totals.html.heex",
+            assigns: %{totals: BlueSky.PostCreatedReader.get_totals()}
+          )
+      })
+    )
   end
 
-  get "/events/post-created" do
+  get "/events/post-created/totals" do
+    conn
+    |> put_resp_content_type("text/html; charset=utf-8")
+    |> send_resp(
+      200,
+      eval_file(
+        "lib/icky_venus/totals.html.heex",
+        assigns: %{totals: BlueSky.PostCreatedReader.get_totals()}
+      )
+    )
+  end
+
+  get "/events/post-created/stream" do
     conn
     |> WebSockAdapter.upgrade(IckyVenus.WebsocketServer.PostCreatedServer, [], timeout: 60_000)
     |> halt()
@@ -23,13 +45,13 @@ defmodule IckyVenus.Router do
   get "/favicon.ico" do
     conn
     |> put_resp_content_type("image/x-icon")
-    |> send_file(200, "lib/priv/static/favicon.ico")
+    |> send_file(200, "priv/static/favicon.ico")
   end
 
   get "/robots.txt" do
     conn
     |> put_resp_content_type("text/plain; charset=utf-8")
-    |> send_file(200, "lib/priv/static/robots.txt")
+    |> send_file(200, "priv/static/robots.txt")
   end
 
   match _ do

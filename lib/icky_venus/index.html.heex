@@ -3,12 +3,20 @@
     <p class="mt-4 text-xl font-semibold leading-10 tracking-tighter text-primary-900">
       Bluesky Metrics
     </p>
+    <p class="mt-4 text-base leading-7 text-neutral-600">
+      Metrics on the number of posts created since page load and the total number of posts created by date.
+    </p>
     <div class="flex">
       <div class="w-full sm:w-auto">
-        <div hx-ext="ws" ws-connect="/events/post-created">
-          <p>
-            Posts since page load: <span id="count">0</span>
-          </p>
+        <div class="mt-10">
+          <div hx-ext="ws" ws-connect="/events/post-created/stream">
+            <p>
+              Since page load: <span id="count">0</span>
+            </p>
+          </div>
+          <div id="totals" hx-get="/events/post-created/totals" hx-trigger="every 30s">
+            <%= @total_content %>
+          </div>
         </div>
       </div>
     </div>

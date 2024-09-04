@@ -8,7 +8,8 @@ defmodule BlueSky.Application do
         keys: :duplicate,
         name: BlueSky.EventRegistry.PostCreated
       ),
-      BlueSky.StreamReader
+      BlueSky.StreamReader,
+      BlueSky.PostCreatedWriter
     ]
 
     opts = [strategy: :one_for_one, name: BlueSky.Supervisor]

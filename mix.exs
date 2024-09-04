@@ -27,7 +27,8 @@ defmodule IckyVenus.MixProject do
       {:bandit, "~> 1.0"},
       {:websockex, "~> 0.4.3"},
       {:cbor, "~> 1.0.0"},
-      {:websock_adapter, "~> 0.5.7"}
+      {:websock_adapter, "~> 0.5.7"},
+      {:number, "~> 1.0"}
     ]
   end
 end
