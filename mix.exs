@@ -15,6 +15,7 @@ defmodule IckyVenus.MixProject do
   def application do
     [
       extra_applications: [:logger],
+      # mod: {BlueSky.Application, []}
       mod: {IckyVenus.Application, []}
     ]
   end

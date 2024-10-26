@@ -1,4 +1,4 @@
-defmodule IckyVenus.WebsocketServer.PostCreatedServer do
+defmodule IckyVenus.WebSocketServer.PostCreatedServer do
   def init(_) do
     Process.send_after(self(), :register_event, 1000)
     {:ok, 0}

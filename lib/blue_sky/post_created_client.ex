@@ -1,5 +1,5 @@
-defmodule BlueSky.PostCreatedReader do
+defmodule BlueSky.PostCreatedClient do
   def get_totals() do
-    GenServer.call(BlueSky.PostCreatedWriter, :get_totals)
+    GenServer.call(BlueSky.PostCreatedServer, :get_totals)
   end
 end

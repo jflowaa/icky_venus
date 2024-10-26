@@ -2,15 +2,10 @@ defmodule BlueSky.StreamReader do
   use WebSockex
 
   def start_link(state \\ []) do
-    # extra_headers = [
-    #   {"Authorization", "Bearer #{token}"}
-    # ]
-
     WebSockex.start_link(
       "wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos",
       __MODULE__,
       state
-      # extra_headers: extra_headers
     )
   end
 

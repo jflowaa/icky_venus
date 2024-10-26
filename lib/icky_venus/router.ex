@@ -3,9 +3,6 @@ defmodule IckyVenus.Router do
   use Plug.Router
   use Plug.ErrorHandler
 
-  alias IckyVenus.Plug.VerifyUserSessionRequest
-
-  plug(VerifyUserSessionRequest, fields: ["content", "mimetype"], paths: ["/upload"])
   plug(:match)
   plug(:dispatch)
 
@@ -14,11 +11,11 @@ defmodule IckyVenus.Router do
     |> put_resp_content_type("text/html; charset=utf-8")
     |> send_resp(
       200,
-      IckyVenus.HtmlRenderer.render_html("lib/icky_venus/index.html.heex", %{
+      IckyVenus.HtmlRenderer.render_html("lib/icky_venus/index.html.eex", %{
         total_content:
           eval_file(
-            "lib/icky_venus/totals.html.heex",
-            assigns: %{totals: BlueSky.PostCreatedReader.get_totals()}
+            "lib/icky_venus/totals.html.eex",
+            assigns: %{totals: BlueSky.PostCreatedClient.get_totals()}
           )
       })
     )
@@ -30,15 +27,15 @@ defmodule IckyVenus.Router do
     |> send_resp(
       200,
       eval_file(
-        "lib/icky_venus/totals.html.heex",
-        assigns: %{totals: BlueSky.PostCreatedReader.get_totals()}
+        "lib/icky_venus/totals.html.eex",
+        assigns: %{totals: BlueSky.PostCreatedClient.get_totals()}
       )
     )
   end
 
   get "/events/post-created/stream" do
     conn
-    |> WebSockAdapter.upgrade(IckyVenus.WebsocketServer.PostCreatedServer, [], timeout: 60_000)
+    |> WebSockAdapter.upgrade(IckyVenus.WebSocketServer.PostCreatedServer, [], timeout: 60_000)
     |> halt()
   end
 

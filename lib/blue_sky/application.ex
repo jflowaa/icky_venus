@@ -9,7 +9,7 @@ defmodule BlueSky.Application do
         name: BlueSky.EventRegistry.PostCreated
       ),
       BlueSky.StreamReader,
-      BlueSky.PostCreatedWriter
+      BlueSky.PostCreatedServer
     ]
 
     opts = [strategy: :one_for_one, name: BlueSky.Supervisor]

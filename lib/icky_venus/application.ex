@@ -10,7 +10,7 @@ defmodule IckyVenus.Application do
         name: BlueSky.EventRegistry.PostCreated
       ),
       BlueSky.StreamReader,
-      BlueSky.PostCreatedWriter
+      BlueSky.PostCreatedServer
     ]
 
     opts = [strategy: :one_for_one, name: IckyVenus.Supervisor]
@@ -20,5 +20,5 @@ defmodule IckyVenus.Application do
     Supervisor.start_link(children, opts)
   end
 
-  defp server_port, do: Application.get_env(:example, :server_port, 4000)
+  defp server_port, do: Application.get_env(:icky_venus, :server_port, 4000)
 end

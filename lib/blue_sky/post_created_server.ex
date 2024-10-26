@@ -1,4 +1,4 @@
-defmodule BlueSky.PostCreatedWriter do
+defmodule BlueSky.PostCreatedServer do
   use GenServer
 
   def start_link(_) do
