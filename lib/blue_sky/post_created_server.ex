@@ -3,6 +3,7 @@ defmodule BlueSky.PostCreatedServer do
   require Logger
 
   @state_file "post_created_state.json"
+  @hour_in_milliseconds 3_600_000
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
@@ -12,6 +13,7 @@ defmodule BlueSky.PostCreatedServer do
     Process.flag(:trap_exit, true)
     state = read_state_from_file()
     Process.send_after(self(), :register_event, 1000)
+    :timer.send_interval(@hour_in_milliseconds, :persist_state)
     {:ok, state}
   end
 
@@ -31,6 +33,11 @@ defmodule BlueSky.PostCreatedServer do
 
   def handle_info({:EXIT, _pid, _reason}, state) do
     {:stop, :normal, state}
+  end
+
+  def handle_info(:persist_state, state) do
+    write_state_to_file(state)
+    {:noreply, state}
   end
 
   def terminate(reason, state) do

@@ -10,6 +10,7 @@ tar -xzvf /tmp/icky_venus.tar.gz -C ~/sites/icky_venus && \
 rm /tmp/icky_venus.tar.gz && \
 cd ~/sites/icky_venus/ && \
 asdf local elixir 1.16 && \
+asdf local erlang 26.2.5.3 && \
 mix deps.get && \
 MIX_ENV=prod mix release --overwrite && \
 ~/sites/icky_venus/_build/prod/rel/icky_venus/bin/icky_venus daemon && \
