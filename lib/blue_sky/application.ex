@@ -1,18 +1,26 @@
 defmodule BlueSky.Application do
   use Application
 
+  @registry BlueSky.EventRegistry.PostCreated
+
   @impl true
   def start(_type, _args) do
     children = [
-      Registry.child_spec(
-        keys: :duplicate,
-        name: BlueSky.EventRegistry.PostCreated
-      ),
-      BlueSky.StreamReader,
-      BlueSky.PostCreatedServer
+      {Registry, [keys: :duplicate, name: @registry]},
+      %{
+        id: BlueSky.StreamReader,
+        start: {BlueSky.StreamReader, :start_link, []},
+        shutdown: 10_000
+      },
+      %{
+        id: BlueSky.PostCreatedServer,
+        start: {BlueSky.PostCreatedServer, :start_link, [%{}]}
+      }
     ]
 
-    opts = [strategy: :one_for_one, name: BlueSky.Supervisor]
-    Supervisor.start_link(children, opts)
+    Supervisor.start_link(children,
+      strategy: :one_for_one,
+      name: BlueSky.Supervisor
+    )
   end
 end

@@ -3,86 +3,82 @@ defmodule BlueSky.PostCreatedServer do
   require Logger
 
   @state_file "post_created_state.json"
-  @hour_in_milliseconds 3_600_000
+  @five_minutes_in_milliseconds 300_000
+  @registry BlueSky.EventRegistry.PostCreated
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
 
+  @impl GenServer
   def init(_) do
     Process.flag(:trap_exit, true)
-    state = read_state_from_file()
-    Process.send_after(self(), :register_event, 1000)
-    :timer.send_interval(@hour_in_milliseconds, :persist_state)
-    {:ok, state}
+    schedule_tasks()
+    {:ok, load_initial_state()}
   end
 
-  def handle_call(:get_totals, _from, state) do
-    {:reply, state, state}
-  end
+  @impl GenServer
+  def handle_call(:get_totals, _from, state), do: {:reply, state, state}
 
+  @impl GenServer
   def handle_info(:register_event, state) do
-    Registry.register(BlueSky.EventRegistry.PostCreated, :post_created, %{})
+    Registry.register(@registry, :post_created, %{})
     {:noreply, state}
   end
 
+  @impl GenServer
   def handle_info(:broadcast, state) do
-    count = Map.get(state, Date.to_string(Date.utc_today()), 0) + 1
-    {:noreply, Map.put(state, Date.to_string(Date.utc_today()), count)}
+    today = get_today()
+    {:noreply, update_count(state, today)}
   end
 
+  @impl GenServer
+  def handle_info(:persist_state, state) do
+    save_state(state)
+    {:noreply, state}
+  end
+
+  @impl GenServer
   def handle_info({:EXIT, _pid, _reason}, state) do
+    save_state(state)
     {:stop, :normal, state}
   end
 
-  def handle_info(:persist_state, state) do
-    write_state_to_file(state)
-    {:noreply, state}
+  @impl GenServer
+  def terminate(_reason, state) do
+    save_state(state)
   end
 
-  def terminate(reason, state) do
-    write_state_to_file(state)
-    Logger.info("PostCreatedServer is terminating", reason: reason)
-    {:ok, state}
+  defp schedule_tasks do
+    Process.send_after(self(), :register_event, 1000)
+    :timer.send_interval(@five_minutes_in_milliseconds, :persist_state)
   end
 
-  defp read_state_from_file do
-    state_file_path = get_state_file_path()
+  defp load_initial_state do
+    case File.read(get_state_file_path()) do
+      {:ok, contents} ->
+        Jason.decode!(contents)
 
-    if File.exists?(state_file_path) do
-      case File.read(state_file_path) do
-        {:ok, content} ->
-          case Jason.decode(content) do
-            {:ok, state} ->
-              state
-
-            {:error, reason} ->
-              Logger.error("Failed to decode JSON from state file", reason: reason)
-              %{}
-          end
-
-        {:error, reason} ->
-          Logger.error("Failed to read state file", reason: reason)
-          %{}
-      end
-    else
-      %{}
+      {:error, _reason} ->
+        Logger.warning("No state file found, starting fresh")
+        %{}
     end
+  rescue
+    e ->
+      Logger.error("Failed to load state: #{inspect(e)}")
+      %{}
   end
 
-  defp write_state_to_file(state) do
-    state
-    |> Jason.encode!()
-    |> (&File.write!(get_state_file_path(), &1)).()
+  defp save_state(state) do
+    File.write!(get_state_file_path(), Jason.encode!(state))
   rescue
-    e in File.Error ->
-      Logger.error("Failed to write state file", exception: e)
-      File.mkdir_p!(Path.dirname(get_state_file_path()))
-      Logger.info("Attempting to write state file again after creating directory")
+    e -> Logger.error("Failed to save state: #{inspect(e)}")
+  end
 
-      state
-      |> Jason.encode!()
-      |> (&File.write!(get_state_file_path(), &1)).()
+  defp get_today, do: Date.utc_today() |> Date.to_string()
+
+  defp update_count(state, date) do
+    Map.update(state, date, 1, &(&1 + 1))
   end
 
   defp get_state_file_path do

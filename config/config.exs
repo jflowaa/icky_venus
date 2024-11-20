@@ -10,3 +10,5 @@ config :number,
     delimiter: ",",
     separator: "."
   ]
+
+import_config "#{config_env()}.exs"

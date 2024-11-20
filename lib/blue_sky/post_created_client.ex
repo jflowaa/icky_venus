@@ -1,5 +1,13 @@
 defmodule BlueSky.PostCreatedClient do
-  def get_totals() do
-    GenServer.call(BlueSky.PostCreatedServer, :get_totals)
+  @server BlueSky.PostCreatedServer
+  @timeout 5000
+
+  def get_totals do
+    try do
+      {:ok, GenServer.call(@server, :get_totals, @timeout)}
+    catch
+      :exit, reason ->
+        {:error, reason}
+    end
   end
 end
