@@ -59,7 +59,7 @@ defmodule IckyVenus.WebSocketServer.PostCreatedServer do
 
   @impl true
   def terminate(reason, state) do
-    Logger.info("Server terminating. Reason: #{inspect(reason)}")
+    Logger.info("Post created web socket server terminating. Reason: #{inspect(reason)}")
     {:ok, state}
   end
 

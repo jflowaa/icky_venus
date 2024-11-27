@@ -1,5 +1,9 @@
 import Config
 
+config :logger,
+  handle_otp_reports: true,
+  handle_sasl_reports: true
+
 config :logger, :default_handler,
   config: [
     file: ~c"logs.log",

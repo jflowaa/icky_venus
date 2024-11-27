@@ -4,15 +4,17 @@ defmodule BlueSky.StreamReader do
 
   @bluesky_websocket_url "wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos"
   @post_path_prefix "app.bsky.feed.post"
+  @initial_backoff 500
 
   def start_link(initial_state \\ []) do
-    WebSockex.start_link(
-      @bluesky_websocket_url,
-      __MODULE__,
-      initial_state
-    )
+    Task.start_link(fn ->
+      connect_with_backoff(initial_state, @initial_backoff)
+    end)
+
+    {:ok, self()}
   end
 
+  @impl true
   def handle_frame({_type, message}, state) do
     with {:ok, decoded_message, raw_payload} <- CBOR.decode(message),
          true <- commit_message?(decoded_message),
@@ -28,6 +30,28 @@ defmodule BlueSky.StreamReader do
       {:error, reason} ->
         Logger.error("Failed to process frame: #{inspect(reason)}")
         {:ok, state}
+    end
+  end
+
+  @impl true
+  def handle_disconnect(_, state) do
+    Logger.error("Disconnected from BlueSky WebSocket; reconnecting...")
+    {:reconnect, state}
+  end
+
+  defp connect_with_backoff(initial_state, delay) do
+    case WebSockex.start_link(@bluesky_websocket_url, __MODULE__, initial_state) do
+      {:ok, pid} ->
+        Logger.info("Successfully connected to BluSky WebSocket")
+        pid
+
+      {:error, reason} ->
+        jitter = trunc(:rand.uniform() * delay * 0.1)
+        next_delay = min(delay * 2, 30_000)
+
+        Logger.warning("Failed to connect: #{inspect(reason)}. Retrying in #{delay + jitter}ms")
+        Process.sleep(delay + jitter)
+        connect_with_backoff(initial_state, next_delay)
     end
   end
 
