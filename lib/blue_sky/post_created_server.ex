@@ -14,6 +14,7 @@ defmodule BlueSky.PostCreatedServer do
   def init(_) do
     Process.flag(:trap_exit, true)
     schedule_tasks()
+
     {:ok, load_initial_state()}
   end
 
@@ -83,6 +84,7 @@ defmodule BlueSky.PostCreatedServer do
 
   defp get_state_file_path do
     config_dir = :filename.basedir(:user_config, to_string(:icky_venus))
+    IO.puts("config_dir: #{inspect(config_dir)}")
     Path.join([config_dir, @state_file])
   end
 end

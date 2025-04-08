@@ -1,5 +1,4 @@
 defmodule IckyVenus.Router do
-  import EEx
   use Plug.Router
   use Plug.ErrorHandler
 
@@ -15,28 +14,11 @@ defmodule IckyVenus.Router do
   }
 
   get "/" do
-    totals =
-      case BlueSky.PostCreatedClient.get_totals() do
-        {:ok, totals} ->
-          totals
-
-        {:error, reason} ->
-          Logger.error("Failed to get totals: #{inspect(reason)}")
-
-          %{}
-      end
-
     conn
     |> put_resp_content_type("text/html; charset=utf-8")
     |> send_resp(
       200,
-      IckyVenus.HtmlRenderer.render_html("lib/icky_venus/index.html.eex", %{
-        total_content:
-          eval_file(
-            "lib/icky_venus/totals.html.eex",
-            assigns: %{totals: totals}
-          )
-      })
+      IckyVenus.HtmlRenderer.render_html("lib/icky_venus/index.html.eex")
     )
   end
 
@@ -53,14 +35,8 @@ defmodule IckyVenus.Router do
       end
 
     conn
-    |> put_resp_content_type("text/html; charset=utf-8")
-    |> send_resp(
-      200,
-      eval_file(
-        "lib/icky_venus/totals.html.eex",
-        assigns: %{totals: totals}
-      )
-    )
+    |> put_resp_content_type("application/json; charset=utf-8")
+    |> send_resp(200, Jason.encode!(totals))
   end
 
   get "/events/post-created/stream" do

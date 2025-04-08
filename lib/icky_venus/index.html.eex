@@ -1,24 +1,173 @@
-<div class="px-4 sm:py-28 sm:px-6 lg:px-8 xl:py-32 xl:px-28">
-  <div class="mx-auto max-w-xl lg:mx-0">
+<div class="">
+  <div class="mx-auto max-w-xl">
     <p class="mt-4 text-xl font-semibold leading-10 tracking-tighter text-primary-900">
       Bluesky Metrics
     </p>
     <p class="mt-4 text-base leading-7 text-neutral-600">
       Metrics on the number of posts created since page load and the total number of posts created by date.
     </p>
-    <div class="flex">
+    <div class="flex flex-col gap-4">
       <div class="w-full sm:w-auto">
-        <div class="mt-10">
+        <div class="mt-10 w-full">
           <div hx-ext="ws" ws-connect="/events/post-created/stream">
             <p>
               Since page load: <span id="count">0</span>
             </p>
           </div>
-          <div id="totals" hx-get="/events/post-created/totals" hx-trigger="every 30s">
-            <%= @total_content %>
+          <div class="w-full sm:w-auto" id="totals" style="display: none;" hx-get="/events/post-created/totals" hx-trigger="every 5s" hx-ext="updateChart"></div>
+
+          <div class="w-full sm:w-auto">
+            <label for="dateRange" class="block text-sm font-medium text-neutral-700">Date Range:</label>
+            <select id="dateRange" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+              <option value="5-days">Last 5 Days</option>
+              <option value="30-days">Last 30 Days</option>
+              <option value="3-months">Last 3 Months</option>
+              <option value="6-months">Last 6 Months</option>
+              <option value="1-year">Last 1 Year</option>
+              <option value="ytd">Year to Date</option>
+              <option value="all-time">All Time</option>
+            </select>
+          </div>
+          <div class="relative w-full h-96 sm:h-[calc(100vh-10rem)]">
+            <canvas id="totalsChart" class="w-full h-full"></canvas>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  let totalsChart;
+
+  function initializeChart() {
+    const canvas = document.getElementById('totalsChart');
+    const ctx = canvas.getContext('2d');
+
+    totalsChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Posts by Date',
+          data: [],
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderWidth: 2,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Date'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Number of Posts'
+            },
+            beginAtZero: true
+          }
+        }
+      }
+    });
+
+    // Fetch initial data for the chart
+    fetch('/events/post-created/totals')
+      .then(response => response.json())
+      .then(responseData => {
+        const labels = Object.keys(responseData);
+        const data = Object.values(responseData);
+        updateChart(labels, data);
+      })
+      .catch(error => console.error('Error fetching initial chart data:', error));
+  }
+
+  function updateChart(labels, data) {
+    if (totalsChart) {
+      const sortedData = labels
+        .map((label, index) => ({ label, value: data[index] }))
+        .sort((a, b) => new Date(a.label) - new Date(b.label));
+
+      const sortedLabels = sortedData.map(item => item.label);
+      const sortedValues = sortedData.map(item => item.value);
+
+      totalsChart.data.labels = sortedLabels;
+      totalsChart.data.datasets[0].data = sortedValues;
+      totalsChart.update();
+    }
+  }
+
+  function filterChartByDateRange(range) {
+    const now = new Date();
+    let startDate;
+
+    switch (range) {
+      case '5-days':
+        startDate = new Date(now.setDate(now.getDate() - 5));
+        break;
+      case '30-days':
+        startDate = new Date(now.setDate(now.getDate() - 30));
+        break;
+      case '3-months':
+        startDate = new Date(now.setMonth(now.getMonth() - 3));
+        break;
+      case '6-months':
+        startDate = new Date(now.setMonth(now.getMonth() - 6));
+        break;
+      case '1-year':
+        startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+        break;
+      case 'ytd':
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+      default:
+        startDate = null; // All time
+    }
+
+    fetch('/events/post-created/totals')
+      .then(response => response.json())
+      .then(responseData => {
+        const labels = Object.keys(responseData);
+        const data = Object.values(responseData);
+
+        if (startDate) {
+          const filteredData = labels
+            .map((label, index) => ({ label, value: data[index] }))
+            .filter(item => new Date(item.label) >= startDate);
+
+          const filteredLabels = filteredData.map(item => item.label);
+          const filteredValues = filteredData.map(item => item.value);
+
+          updateChart(filteredLabels, filteredValues);
+        } else {
+          updateChart(labels, data); // All time
+        }
+      })
+      .catch(error => console.error('Error fetching filtered chart data:', error));
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initializeChart();
+
+    const dateRangeDropdown = document.getElementById('dateRange');
+    dateRangeDropdown.value = '30-days';
+    filterChartByDateRange('30-days');
+
+    dateRangeDropdown.addEventListener('change', (event) => {
+      filterChartByDateRange(event.target.value);
+    });
+  });
+</script>
