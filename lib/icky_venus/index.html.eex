@@ -14,8 +14,6 @@
               Since page load: <span id="count">0</span>
             </p>
           </div>
-          <div class="w-full sm:w-auto" id="totals" style="display: none;" hx-get="/events/post-created/totals" hx-trigger="every 5s" hx-ext="updateChart"></div>
-
           <div class="w-full sm:w-auto">
             <label for="dateRange" class="block text-sm font-medium text-neutral-700">Date Range:</label>
             <select id="dateRange" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
@@ -29,6 +27,17 @@
             </select>
           </div>
           <div class="relative w-full h-96 sm:h-[calc(100vh-10rem)]">
+             <!-- Move filtering on server side to be able to leverage HTMx -->
+             <!-- Something like: <div
+                id="totals"
+                hx-get="/events/post-created/totals"
+                hx-params="dateRange"
+                hx-trigger="change from:#dateRange, every 5s"
+                hx-target="this"
+                hx-swap="none"
+                hx-on="htmx:afterRequest: updateChartFromJson(event.detail.xhr.responseText)"
+                style="display:none"
+              ></div> -->
             <canvas id="totalsChart" class="w-full h-full"></canvas>
           </div>
         </div>
@@ -41,8 +50,7 @@
   let totalsChart;
 
   function initializeChart() {
-    const canvas = document.getElementById('totalsChart');
-    const ctx = canvas.getContext('2d');
+    const ctx = document.getElementById('totalsChart').getContext('2d');
 
     totalsChart = new Chart(ctx, {
       type: 'line',
@@ -83,16 +91,6 @@
         }
       }
     });
-
-    // Fetch initial data for the chart
-    fetch('/events/post-created/totals')
-      .then(response => response.json())
-      .then(responseData => {
-        const labels = Object.keys(responseData);
-        const data = Object.values(responseData);
-        updateChart(labels, data);
-      })
-      .catch(error => console.error('Error fetching initial chart data:', error));
   }
 
   function updateChart(labels, data) {
