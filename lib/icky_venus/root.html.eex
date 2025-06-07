@@ -33,9 +33,16 @@
           <%= Application.get_env(:icky_venus, :product_name) %>
         </a>
       </div>
-      <div class="flex items-center gap-4 text-[0.7525rem] font-semibold leading-6 text-secondary-800 active:text-secondary-800/70">
+      <div class="flex items-center gap-4 text-[0.7525rem] font-semibold leading-6 text-secondary-800 active:text-secondary-800/70 mr-2">
+        <a
+          href="https://jack-develops.com/projects"
+          class="rounded-lg bg-primary-100 px-2 py-1 text-[0.8125rem] hover:bg-secondary-200/80"
+        >
+          More Projects
+        </a>
         <a
           href="https://github.com/jflowaa/icky_venus"
+          target="_blank"
           class="rounded-lg bg-primary-100 px-2 py-1 text-[0.8125rem] hover:bg-secondary-200/80"
         >
           Source Code <span aria-hidden="true">&rarr;</span>
