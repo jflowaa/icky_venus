@@ -12,3 +12,9 @@ mix run --no-halt
 ```
 
 Then visit http://localhost:4000/
+
+## Deployment
+
+```sh
+./deployment/deploy_ovh.sh
+```

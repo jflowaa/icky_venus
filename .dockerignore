@@ -1,0 +1,10 @@
+.git
+.github
+.elixir_ls
+_build
+deps
+test
+*.db
+*.db-*
+erl_crash.dump
+.DS_Store

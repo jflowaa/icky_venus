@@ -1,0 +1,21 @@
+name: icky-venus
+
+services:
+  icky-venus:
+    image: icky_venus:${IMAGE_TAG}
+    container_name: icky-venus
+    restart: unless-stopped
+    env_file: [./env/app.env]
+    environment:
+      PORT: "4000"
+    networks: [edge]
+    mem_limit: 384m
+    security_opt: [no-new-privileges:true]
+    logging:
+      driver: k8s-file
+      options:
+        max-size: "15m"
+
+networks:
+  edge:
+    external: true

@@ -1,0 +1,16 @@
+[Unit]
+Description=icky-venus compose stack
+Wants=network-online.target
+After=network-online.target platform-compose.service
+Requires=platform-compose.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/srv/apps/icky-venus
+ExecStart=/usr/bin/podman-compose -p icky-venus up -d --remove-orphans
+ExecStop=/usr/bin/podman-compose -p icky-venus down
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

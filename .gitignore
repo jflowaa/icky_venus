@@ -35,3 +35,9 @@ icky-venus-*.tar
 /assets/node_modules/
 /.elixir_ls
 dbs/**
+
+# Per-overlay Kustomize secret values
+
+# Compose deployment values
+deployment/.env
+deployment/env/*.env
