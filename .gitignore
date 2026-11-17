@@ -41,3 +41,7 @@ dbs/**
 # Compose deployment values
 deployment/.env
 deployment/env/*.env
+
+# Production compose values (live only on the VM)
+deployment/production/env/*.env
+!deployment/production/env/*.env.example
