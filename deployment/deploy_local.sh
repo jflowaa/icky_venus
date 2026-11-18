@@ -34,9 +34,11 @@ container_build "$platform" -f "$APP_DIR/$DOCKERFILE" -t "$IMAGE:$TAG" "$APP_DIR
 cd "$APP_DIR/deployment"
 engine="$(container_engine)"
 if [ "$engine" = podman ]; then
-  command -v podman-compose >/dev/null 2>&1 \
-    || { echo "error: podman-compose not found" >&2; exit 1; }
-  compose=(podman-compose -p "$PROJECT" -f compose.yaml)
+  if command -v podman-compose >/dev/null 2>&1; then
+    compose=(podman-compose -p "$PROJECT" -f compose.yaml)
+  else
+    compose=(podman compose -p "$PROJECT" -f compose.yaml)
+  fi
 else
   compose=(docker compose -p "$PROJECT" -f compose.yaml)
 fi
